@@ -10,7 +10,7 @@ from PIL import Image
 
 app = Flask(__name__)
 
-# 🔴 นำกุญแจทั้ง 3 ดอกของคุณ มาใส่ในช่องว่างด้านล่างนี้
+# 🔴 นำกุญแจทั้ง 3 ดอกของคุณ มาใส่ตรงนี้ (ระวังเรื่องเว้นวรรคให้ดีนะครับ)
 LINE_CHANNEL_ACCESS_TOKEN = 'I1tVyY+ii/Alj5oITsOdfZF1esFzlNY4j8NKvsUYBtw6Gnq3S4Py+kryy/I4I26EnCQizM83zc8g1Ol3hSHqEDnksODMZXOV5d2zrkFVzIUYgSg/MU6TgEdulyS9X9rEoj4xeqzSrP2aU7Lqy1eUzQdB04t89/1O/w1cDnyilFU='
 LINE_CHANNEL_SECRET = '4d6fa3edc845273ddb6fb8be0494246a'
 GEMINI_API_KEY = 'AQ.Ab8RN6KbHQVMtZjUINQXw-6k1-uwyoKRXlTewkUl_mhzq6TXrg'
@@ -19,20 +19,9 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 genai.configure(api_key=GEMINI_API_KEY)
 
-# 🔴 ระบบค้นหาชื่อโมเดล AI ล่าสุดที่คุณมีสิทธิ์ใช้งานโดยอัตโนมัติ
-best_model_name = "gemini-1.5-flash" # ชื่อสำรองกรณีฉุกเฉิน
-try:
-    for m in genai.list_models():
-        if 'generateContent' in m.supported_generation_methods:
-            # ค้นหาโมเดลที่รองรับการมองเห็นภาพ (Vision/Flash)
-            if 'flash' in m.name.lower() or 'vision' in m.name.lower():
-                best_model_name = m.name
-                break
-except Exception as e:
-    print("Model search error:", e)
-
-# สั่งใช้งานโมเดลที่ค้นพบ
-model = genai.GenerativeModel(best_model_name)
+# 🔴 กำหนดชื่อรุ่น Gemini เป็นเวอร์ชันที่คุณต้องการ
+# หาก Google มีการใช้ชื่อรุ่น 3.5 เต็มๆ ว่าอะไร สามารถเปลี่ยนในวงเล็บได้เลยครับ เช่น 'gemini-3.5-pro'
+model = genai.GenerativeModel('gemini-3.5') 
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -90,10 +79,9 @@ def handle_image(event):
 
         except Exception as e:
             print("Error:", e)
-            # เพิ่มการแสดงชื่อโมเดลที่ใช้งานในข้อความ Error เพื่อใช้ตรวจสอบ
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f"❌ AI แจ้งสาเหตุว่า: {str(e)}\n(โมเดลที่พยายามใช้งาน: {best_model_name})")
+                TextSendMessage(text=f"❌ AI แจ้งสาเหตุว่า: {str(e)}")
             )
 
 if __name__ == "__main__":
