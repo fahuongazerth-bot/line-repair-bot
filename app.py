@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 LINE_CHANNEL_ACCESS_TOKEN = 'I1tVyY+ii/Alj5oITsOdfZF1esFzlNY4j8NKvsUYBtw6Gnq3S4Py+kryy/I4I26EnCQizM83zc8g1Ol3hSHqEDnksODMZXOV5d2zrkFVzIUYgSg/MU6TgEdulyS9X9rEoj4xeqzSrP2aU7Lqy1eUzQdB04t89/1O/w1cDnyilFU='
 LINE_CHANNEL_SECRET = '4d6fa3edc845273ddb6fb8be0494246a'
-GEMINI_API_KEY = 'AQ.Ab8RN6LBhuU9c6rIF47VAG3zGMSIQu9wHPY3WcTO2x9Ca49G1A'
+GEMINI_API_KEY = 'AQ.Ab8RN6KbHQVMtZjUINQXw-6k1-uwyoKRXlTewkUl_mhzq6TXrg'
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
@@ -87,8 +87,7 @@ def handle_image(event):
             print("Error:", e)
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text="❌ เกิดข้อผิดพลาด: AI ไม่สามารถอ่านรูปภาพบิลนี้ได้ กรุณาลองส่งใหม่อีกครั้ง หรือตรวจสอบความชัดเจนของรูปภาพ")
-            )
+                TextSendMessage(text=f"❌ AI แจ้งสาเหตุว่า: {str(e)}")
 
 if __name__ == "__main__":
     app.run(port=8080)
