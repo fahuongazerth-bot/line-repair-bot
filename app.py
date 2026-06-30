@@ -10,7 +10,7 @@ from PIL import Image
 
 app = Flask(__name__)
 
-# 🔴 นำกุญแจทั้ง 3 ดอกของคุณ มาใส่ในช่องว่างด้านล่างนี้ (ระวังอย่าลบเครื่องหมาย ' ')
+# 🔴 นำกุญแจทั้ง 3 ดอกของคุณ มาใส่ในช่องว่างด้านล่างนี้
 LINE_CHANNEL_ACCESS_TOKEN = 'I1tVyY+ii/Alj5oITsOdfZF1esFzlNY4j8NKvsUYBtw6Gnq3S4Py+kryy/I4I26EnCQizM83zc8g1Ol3hSHqEDnksODMZXOV5d2zrkFVzIUYgSg/MU6TgEdulyS9X9rEoj4xeqzSrP2aU7Lqy1eUzQdB04t89/1O/w1cDnyilFU='
 LINE_CHANNEL_SECRET = '4d6fa3edc845273ddb6fb8be0494246a'
 GEMINI_API_KEY = 'AQ.Ab8RN6KbHQVMtZjUINQXw-6k1-uwyoKRXlTewkUl_mhzq6TXrg'
@@ -19,7 +19,20 @@ line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 genai.configure(api_key=GEMINI_API_KEY)
 
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
+# 🔴 ระบบค้นหาชื่อโมเดล AI ล่าสุดที่คุณมีสิทธิ์ใช้งานโดยอัตโนมัติ
+best_model_name = "gemini-1.5-flash" # ชื่อสำรองกรณีฉุกเฉิน
+try:
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
+            # ค้นหาโมเดลที่รองรับการมองเห็นภาพ (Vision/Flash)
+            if 'flash' in m.name.lower() or 'vision' in m.name.lower():
+                best_model_name = m.name
+                break
+except Exception as e:
+    print("Model search error:", e)
+
+# สั่งใช้งานโมเดลที่ค้นพบ
+model = genai.GenerativeModel(best_model_name)
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -42,7 +55,7 @@ def handle_image(event):
             profile = line_bot_api.get_group_member_profile(group_id, user_id)
             sender_name = profile.display_name
         except:
-            sender_name = "ไม่สามารถระบุชื่อไลน์ได้"
+            sender_name = "ไม่ทราบชื่อผู้ส่ง"
 
         try:
             message_content = line_bot_api.get_message_content(event.message.id)
@@ -77,9 +90,10 @@ def handle_image(event):
 
         except Exception as e:
             print("Error:", e)
+            # เพิ่มการแสดงชื่อโมเดลที่ใช้งานในข้อความ Error เพื่อใช้ตรวจสอบ
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(text=f"❌ AI แจ้งสาเหตุว่า: {str(e)}")
+                TextSendMessage(text=f"❌ AI แจ้งสาเหตุว่า: {str(e)}\n(โมเดลที่พยายามใช้งาน: {best_model_name})")
             )
 
 if __name__ == "__main__":
