@@ -1,5 +1,4 @@
-Flask
+flask
 line-bot-sdk
-google-generativeai
-Pillow
-gunicorn
+google-genai
+pillow
