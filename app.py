@@ -1,4 +1,4 @@
-import os
+import threading import os
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -25,7 +25,9 @@ def callback():
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
     try:
-        handler.handle(body, signature)
+        # สั่งให้บอทแยกไปทำงานเบื้องหลัง (Thread) LINE จะได้ไม่รอจน Timeout
+        thread = threading.Thread(target=handler.handle, args=(body, signature))
+        thread.start()
     except InvalidSignatureError:
         abort(400)
     return 'OK'
