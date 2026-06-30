@@ -83,11 +83,12 @@ def handle_image(event):
                 TextSendMessage(text=report_message)
             )
 
-        except Exception as e:
+except Exception as e:
             print("Error:", e)
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=f"❌ AI แจ้งสาเหตุว่า: {str(e)}")
+            )
 
 if __name__ == "__main__":
     app.run(port=8080)
